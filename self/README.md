@@ -4,6 +4,7 @@
 2. [General use cases](#usecases)
 3. [Kafka Python](#kafka-python)
 4. [Why is Kafka needed here?](#why-kafka)
+5. [Workflow of the code](#code-workflow)
 
 
 
@@ -36,12 +37,19 @@
   - on introducing multiple servers, the system of servers thus obtained is called **Kafka messaging system(KMS)** or **Kafka Cluster**.
   - multiple servers can also be introduced as and when the demand surges, hence the KMS has horizontal scalability.
   - a Kafka server is also known as a Kafka **broker**, since its only job is to take from producer and send it to consumer.
+  - the other brokers responsible for being back-ups are called *followers*.
+  - Kafka producer doesn’t wait for acknowledgements from the broker and sends messages as fast as the broker can handle.
   - <font color="Red">how does switching from a faulty broker to an idle broker occur?</font>
   - <font color="Red">is the zookeeper equipped with load balancing functionalities?</font>
 - problem-4: broker-management
   - to which exact broker in the KMS should a producer server feed the data to, and to which exact consumer server should which broker(in the KMS ) send the data to? which entity decides this sort of a broker allocation?
   - **the zookeeper** manages brokers, which broker is taking from which producer and sending to which consumer.
+    - is mainly used to notify producer and consumer about the  **presence of any new broker** in the Kafka system **or failure of the broker**  in the Kafka system. 
+    - As per the notification received by the Zookeeper, a producer or a consumer takes decision and starts coordinating their task with some other  broker.
   - it also sets up back-up brokers when the main brokers fail.
+  - Kafka cluster typically consists of multiple brokers to maintain load  balance. 
+    - Kafka brokers are stateless, so they use Zookeeper for  maintaining their cluster state. <font color="Red">HOW??</font>
+    - Kafka broker  leader election can be done by ZooKeeper.<font color="Red">HOW??</font>
   - ![Kafka Architecture and Its Fundamental Concepts - DataFlair](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd2h0cx97tjks2p.cloudfront.net%2Fblogs%2Fwp-content%2Fuploads%2Fsites%2F2%2F2018%2F04%2FKafka-Architecture.png&f=1&nofb=1)
   - <font color="red">who decides when the data is to be sent to all the consumers? is it done by the zookeeper or the broker, or some new entity?</font>
 - problem-5: load increase due to multi-functionality
@@ -98,6 +106,16 @@
 
 
 
+
+
+# Workflow<a name="kafka-workflow"></a>
+
+
+
+
+
+
+
 # General use cases<a name="usecases"></a>
 
 - field of finance
@@ -115,7 +133,7 @@
   - This involves aggregating statistics from distributed applications to produce centralized feeds of operational data.
   - <font color="red">find practical example or chug this out !!!</font>
 - **Log Aggregation Solution** − 
-  - Kafka can be used across an  organization to collect logs from multiple services and make them  available in a standard format to multiple con-sumers.
+  - Kafka can be used across an  organization to collect logs from multiple services and make them  available in a standard format to multiple consumers.
 
 
 
@@ -130,3 +148,39 @@
 
 
 # Why is Kafka needed here?<a name="why-kafka"></a>
+
+
+
+
+
+### Dataset Description
+
+- target = `income_bracket` : `<= 50K`, `> 50K`
+
+
+
+
+
+# Workflow of the code<a name="code-workflow"></a>
+
+
+
+## `initialize.py`
+
+- `PosixPath.mkdir()` is same as `os.mkdir()` and `(PosixPath).mkdir(exist_ok=True)` is equivalent to bash's `mkdir -p <dir-name>`
+- <font color="red">start from `build_train()`  in `preprocess_data.py`</font>
+
+
+
+- Note that the process below(`predictor.py`) assumes one has run the `initialize.py` script, so an initial `model.p`and `dataprocessor.p`files exist in the corresponding directory.
+
+
+
+
+
+
+
+Alternate ways of installing lightgbm:
+
+- `conda install -c conda-forge lightgbm`
+- `pip install lightgbm`
