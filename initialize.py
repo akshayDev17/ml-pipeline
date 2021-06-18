@@ -37,14 +37,17 @@ def download_data():
 	           "income_bracket"]
 
 	print("downloading training data...")
-	df_train = pd.read_csv("http://mlr.cs.umass.edu/ml/machine-learning-databases/adult/adult.data",
-	    names=COLUMNS, skipinitialspace=True, index_col=0)
+	# old_url = "http://mlr.cs.umass.edu/ml/machine-learning-databases/adult/adult.data"
+	new_url = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
+	df_train = pd.read_csv(new_url, names=COLUMNS, skipinitialspace=True, index_col=0)
 	df_train.drop("education_num", axis=1, inplace=True)
 	df_train.to_csv(train_path)
 	df_train.to_csv(PATH/'train/train.csv')
 
 	print("downloading testing data...")
-	df_test = pd.read_csv("http://mlr.cs.umass.edu/ml/machine-learning-databases/adult/adult.test",
+	# old_test_data = "http://mlr.cs.umass.edu/ml/machine-learning-databases/adult/adult.test"
+	new_test_link = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.test"
+	df_test = pd.read_csv(new_test_link,
 	    names=COLUMNS, skipinitialspace=True, skiprows=1, index_col=0)
 	df_test.drop("education_num", axis=1, inplace=True)
 	df_test.to_csv(test_path)
@@ -75,7 +78,8 @@ if __name__ == '__main__':
 
 	parser.add_argument("--hyper", type=str, default="hyperopt")
 	args = parser.parse_args()
-	create_folders()
-	download_data()
+	# print(args) # prints hyper='hyperopt' and other arguments and their given values
+	# create_folders()
+	# download_data()
 	create_data_processor()
-	create_model(args.hyper)
+	# create_model(args.hyper)
