@@ -86,21 +86,62 @@ class LGBOptimizer(object):
 		self.colnames = trainDataset.colnames
 		self.categorical_columns = trainDataset.categorical_columns + trainDataset.crossed_columns
 
+		# colnames contains all independent variables columns
 		self.lgtrain = lgb.Dataset(self.X,label=self.y,
 			feature_name=self.colnames,
 			categorical_feature = self.categorical_columns,
 			free_raw_data=False)
+		'''
+		free_raw_data (bool, optional (default=True)) – If True, raw data is 
+		freed after constructing inner Dataset.
+		since its passed as False here, it means that it is not freed.
+		_set_predictor method of Dataset class raises the error: 
+		LightGBMError("Cannot set predictor after freed raw data, "
+		"set free_raw_data=False when construct Dataset to avoid this.")
+		'''
 
 	def optimize(self, maxevals=200, model_id=0, reuse_experiment=False):
 
 		param_space = self.hyperparameter_space()
-		objective = self.get_objective(self.lgtrain)
-		objective.i=0
+		objective = self.get_objective(self.lgtrain) # function-pointer is returned
+		objective.i=0 # initialize iteration count to 0
 		trials = Trials()
-		best = fmin(fn=objective,
+
+		'''
+		the first statement of class Trials(): , just above the __init__
+		is : asynchronous = False
+
+		this is the __init__ method of Trials():-
+		def __init__(self, exp_key=None, refresh=True):
+			self._ids = set()
+			self._dynamic_trials = []
+			self._exp_key = exp_key
+			self.attachments = {}
+			if refresh:
+				self.refresh() # nothing happens, since `self._exp_key` is None but `self._dynamic_trials` is empty
+
+		def refresh(self):
+			# In MongoTrials, this method fetches from database
+			if self._exp_key is None:
+				self._trials = [
+					tt for tt in self._dynamic_trials if tt["state"] in JOB_VALID_STATES
+				]
+			else:
+				self._trials = [
+					tt
+					for tt in self._dynamic_trials
+					if (tt["state"] in JOB_VALID_STATES and tt["exp_key"] == self._exp_key)
+				]
+			self._ids.update([tt["tid"] for tt in self._trials])
+
+		JOB_VALID_STATES = {0, 1, 2}
+		'''
+
+		# hyperopt/fmin.py
+		best = fmin(fn=objective, # as the docs say, this uses only 1 argument, params, and returns a scalar, error.
 		            space=param_space,
-		            algo=tpe.suggest,
-		            max_evals=maxevals,
+		            algo=tpe.suggest, # tpe is from hyperopt/tpe.py, provides logic for sequential search of the hyperparameter space.
+		            max_evals=maxevals, # return after these many function evaluations.
 		            trials=trials)
 		best['num_boost_round'] = self.early_stop_dict[trials.best_trial['tid']]
 		best['num_leaves'] = int(best['num_leaves'])
@@ -141,6 +182,9 @@ class LGBOptimizer(object):
 		def objective(params):
 			"""
 			objective function for lightgbm.
+
+			the `space` argument passed in fmin() in the above method 
+			is the `params` argument of this function
 			"""
 			# hyperopt casts as float
 			params['num_boost_round'] = int(params['num_boost_round'])

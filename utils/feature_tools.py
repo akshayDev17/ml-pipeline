@@ -56,9 +56,13 @@ class FeatureTools(object):
 		colnames = ['_'.join(x_c) for x_c in x_cols]
 		crossed_columns = {k:v for k,v in zip(colnames, x_cols)}
 
+		''' new columns are created with new values
+		for instance, if v = ['education', 'occupation'] , then a new-column 
+		called 'education_occupation' will be created. 
+		suppose a sample has education="Bachelors" and occupation="Adm-clerical"
+		then the entry in the new column would be "Bachelors-Adm-clerical" '''
 		for k, v in crossed_columns.items():
 		    df[k] = df[v].apply(lambda x: '-'.join(x), axis=1)
-
 		return df, colnames
 
 	@staticmethod
@@ -120,11 +124,24 @@ class FeatureTools(object):
 
 		df, self.sc = self.num_scaler(df, numerical_columns, sc)
 		df, self.crossed_columns = self.cross_columns(df, x_columns)
+
+		'''dictionary to convert the category of a particular categorical variable 
+		to numerical value
+		dictionary will be of the form: {
+			variable_1:{
+				"category-1":code-1,
+				"category-2":code-2, ....
+			},
+			variable_2:{
+				"category-1":code-1,
+				"category-2":code-2, ....
+			}....
+		}'''
 		df, self.encoding_d = self.val2idx(df, categorical_columns+self.crossed_columns)
 
-		self.target = df[target_col]
+		self.target = df[target_col] # save the response variable values as a separate field
 		df.drop(target_col, axis=1, inplace=True)
-		self.data = df
+		self.data = df # save the dropped column df
 		self.colnames = df.columns.tolist()
 
 		return self

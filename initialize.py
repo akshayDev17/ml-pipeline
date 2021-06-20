@@ -63,6 +63,7 @@ def create_model(hyper):
 	init_dataprocessor = 'dataprocessor_0_.p'
 	dtrain = pickle.load(open(DATAPROCESSORS_PATH/init_dataprocessor, 'rb'))
 	if hyper == "hyperopt":
+		# default option is this
 		# from train.train_hyperopt import LGBOptimizer
 		from train.train_hyperopt_mlflow import LGBOptimizer
 	elif hyper == "hyperparameterhunter":
@@ -81,5 +82,5 @@ if __name__ == '__main__':
 	# print(args) # prints hyper='hyperopt' and other arguments and their given values
 	# create_folders()
 	# download_data()
-	create_data_processor()
-	# create_model(args.hyper)
+	# create_data_processor()
+	create_model(args.hyper)

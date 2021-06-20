@@ -4,6 +4,9 @@ import json
 import pdb
 import warnings
 
+# to be erased
+from tabulate import tabulate
+
 from pathlib import Path
 from utils.feature_tools import FeatureTools
 from sklearn.preprocessing import MinMaxScaler
@@ -39,7 +42,9 @@ def build_train(train_path, results_path, dataprocessor_id=0, PATH_2=None):
 	# filter out the 2 types of variables - categorical and continuous
 	categorical_columns = list(df.select_dtypes(include=['object']).columns)
 	numerical_columns = [c for c in df.columns if c not in categorical_columns+[target]]
-	crossed_columns = (['education', 'occupation'], ['native_country', 'occupation']) # ***REMAINING****
+
+	# These are new columns that are the cartesian product of the parent columns.
+	crossed_columns = (['education', 'occupation'], ['native_country', 'occupation']) 
 
 	preprocessor = FeatureTools()
 	dataprocessor = preprocessor.fit(
@@ -49,12 +54,16 @@ def build_train(train_path, results_path, dataprocessor_id=0, PATH_2=None):
 		categorical_columns,
 		crossed_columns,
 		sc=MinMaxScaler()
-		)
+		) # numerical variables are min-max scaled
+	# target column is dropped, hence income_label will be dropped,
+	# but its values are saved as a separate field
 
+	# binary file
 	dataprocessor_fname = 'dataprocessor_{}_.p'.format(dataprocessor_id)
 	pickle.dump(dataprocessor, open(results_path/dataprocessor_fname, "wb"))
 	if dataprocessor_id==0:
 		pickle.dump(df.columns.tolist()[:-1], open(results_path/'column_order.p', "wb"))
+		# except the last column, i.e. income_label, save the column list in a binary file
 
 	return dataprocessor
 

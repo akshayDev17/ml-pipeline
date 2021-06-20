@@ -3,8 +3,8 @@
 1. [What is Kafka?](#what-kafka)
 2. [General use cases](#usecases)
 3. [Kafka Python](#kafka-python)
-4. [Why is Kafka needed here?](#why-kafka)
-5. [Workflow of the code](#code-workflow)
+4. [Workflow of the code](#code-workflow)
+5. [Why is Kafka needed here?](#why-kafka)
 
 
 
@@ -147,12 +147,6 @@
 
 
 
-# Why is Kafka needed here?<a name="why-kafka"></a>
-
-
-
-
-
 ### Dataset Description
 
 - target = `income_bracket` : `<= 50K`, `> 50K`
@@ -176,7 +170,59 @@
 
 
 
+- `create_data_processor()` ==> `build_train()` in  `utils/preprocess_data.py` , which will create a `FeatureTools` object(code in `utils/feature_tools.py`) called `preprocessor` , thus creating a new `FeatureTools` called `dataprocessor`
 
+  - this `dataprocessor` object is saved in a python pickle file, hence the extension `.p`, used for converting Python objects to a byte representation for storage on disk or transfer over a network.
+
+- `create_model()` ==> check which hyperparameter optimization argument is passed , and import the `LGBOptimizer` class either from `train/train_hyperopt_mlflow.py/` or `train/train_hyperparameterhunter_mlfow.py`  
+
+  - this is followed by accessing the first `dataprocessor` created(in `data/dataprocessors/dataprocessor_0_.p`) . this will server as our final dataset object.
+
+  - the `LGBOptimizer` is created and trained over this dataset for 50 times.
+
+  - commonalities
+
+    - [`lgbm.Dataset`](https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.Dataset.html#lightgbm.Dataset)
+
+  - ### `hyperopt` vs `hyperparameterhunter`
+
+    - [`hyperopt`](http://hyperopt.github.io/hyperopt/) is a Distributed Asynchronous Hyper-parameter Optimization.
+    - it uses the [`Trial` Class](https://github.com/hyperopt/hyperopt/blob/9e7f02a99572023d56bb9d88f1278125fe80c890/hyperopt/base.py#L243)
+      - This class (`base.Trials`) is a pure-Python implementation of the database in terms of lists of dictionaries.
+      - 
+
+  - 
+
+
+
+
+
+
+
+## `utils/feature_tools.py`
+
+- the class `FeatureTools` have many static methods.
+
+  - Static method  can be called without creating an object or instance. 
+
+  - Simply create the method and call it directly. 
+
+  - ```python
+    class Music:
+        @staticmethod
+        def play():
+            print("*playing music*")
+    
+        def stop(self):
+            print("stop playing")
+    
+    Music.play() # static, hence can be directly called
+    
+    obj = Music()
+    obj.stop() # non-static, hence needs instance creation
+    ```
+
+- 
 
 
 
@@ -184,3 +230,11 @@ Alternate ways of installing lightgbm:
 
 - `conda install -c conda-forge lightgbm`
 - `pip install lightgbm`
+
+
+
+
+
+
+
+# Why is Kafka needed here?<a name="why-kafka"></a>
